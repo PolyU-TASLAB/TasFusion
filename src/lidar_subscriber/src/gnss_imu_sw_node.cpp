@@ -1208,50 +1208,18 @@ private:
     MarginalizationInfo* marginalization_info;
 };
 
-// UWB position factor for Ceres
-class UwbPositionFactor {
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    
-    UwbPositionFactor(const Eigen::Vector3d& measured_position, double noise_std)
-        : measured_position_(measured_position), noise_std_(noise_std) {}
-    
-    template <typename T>
-    bool operator()(const T* const pose, T* residuals) const {
-        // Extract position from pose (position + quaternion)
-        Eigen::Map<const Eigen::Matrix<T, 3, 1>> position(pose);
-        
-        // Compute position residuals
-        residuals[0] = (position[0] - T(measured_position_[0])) / T(noise_std_);
-        residuals[1] = (position[1] - T(measured_position_[1])) / T(noise_std_);
-        residuals[2] = (position[2] - T(measured_position_[2])) / T(noise_std_);
-        
-        return true;
-    }
-    
-    static ceres::CostFunction* Create(const Eigen::Vector3d& measured_position, double noise_std) {
-        return new ceres::AutoDiffCostFunction<UwbPositionFactor, 3, 7>(
-            new UwbPositionFactor(measured_position, noise_std));
-    }
-    
-private:
-    const Eigen::Vector3d measured_position_;
-    const double noise_std_;
-};
-
 
 // Main GPS-IMU fusion class
-class UwbImuFusion {
+class GNSSImuFusion {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     
-    UwbImuFusion() {
+    GNSSImuFusion() {
         ros::NodeHandle nh;
         ros::NodeHandle private_nh("~");
         
         // Load topic name parameters
         private_nh.param<std::string>("imu_topic", imu_topic_, "/imu/data");
-        private_nh.param<std::string>("uwb_topic", uwb_topic_, "/sensor_simulator/UWBPoistionPS");
 
         private_nh.param<bool>("subscribe_to_ground_truth", subscribe_to_ground_truth_, false);
         private_nh.param<std::string>("ground_truth_topic", ground_truth_topic_, "/novatel_data/inspvax_gt");
@@ -1263,10 +1231,9 @@ public:
         private_nh.param<std::string>("optimized_log_path", optimized_log_path_, "optimized_log.csv");
 
         private_nh.param<int>("imu_queue_size", imu_queue_size_, 1000);
-        private_nh.param<int>("uwb_queue_size", uwb_queue_size_, 100);
         
-        // Add GPS/UWB mode selection
-        private_nh.param<bool>("use_gps_instead_of_uwb", use_gps_instead_of_uwb_, false);
+        // Add GPS mode selection
+        private_nh.param<bool>("use_gps", use_gps_, false);
         private_nh.param<std::string>("gps_topic", gnss_topic_, "/novatel_data/inspvax");
         private_nh.param<int>("gps_queue_size", gnss_queue_size_, 100);
         private_nh.param<std::string>("gps_message_type", gnss_message_type_, "inspvax");
@@ -1280,8 +1247,8 @@ public:
         
         
         // Load output topic parameters
-        private_nh.param<std::string>("optimized_pose_topic", optimized_pose_topic_, "/uwb_imu_fusion/optimized_pose");
-        private_nh.param<std::string>("imu_pose_topic", imu_pose_topic_, "/uwb_imu_fusion/imu_pose");
+        private_nh.param<std::string>("optimized_pose_topic", optimized_pose_topic_, "/gnss_imu_fusion/optimized_pose");
+        private_nh.param<std::string>("imu_pose_topic", imu_pose_topic_, "/gnss_imu_fusion/imu_pose");
         private_nh.param<int>("optimized_pose_queue_size", optimized_pose_queue_size_, 10);
         private_nh.param<int>("imu_pose_queue_size", imu_pose_queue_size_, 20000);
         
@@ -1307,7 +1274,6 @@ public:
         private_nh.param<double>("initial_gyro_bias_y", initial_gyro_bias_y_, -0.001);
         private_nh.param<double>("initial_gyro_bias_z", initial_gyro_bias_z_, 0.001);
         
-        private_nh.param<double>("uwb_position_noise", uwb_position_noise_, 0.05);  // m
         private_nh.param<int>("optimization_window_size", optimization_window_size_, 20); // Reduced for stability
         
         // Frame IDs
@@ -1358,7 +1324,7 @@ public:
         private_nh.param<double>("bias_correction_threshold", bias_correction_threshold_, 0.05); // Threshold for bias validity check
 
         private_nh.param<std::string>("bias_log_path", bias_path, "");
-        private_nh.param<std::string>("lla_pose_topic", lla_pose_topic_, "/uwb_imu_fusion/lla_pose");
+        private_nh.param<std::string>("lla_pose_topic", lla_pose_topic_, "/gnss_imu_fusion/lla_pose");
         private_nh.param<int>("lla_pose_queue_size", lla_pose_queue_size_, 10); 
         openBiasLogFile();
 
@@ -1401,14 +1367,13 @@ public:
             // --- ★ Log Static Configuration ONCE Here ★ ---
             ROS_INFO("Logging static configuration parameters...");
             logger_.addMetadata("Config: Gravity Magnitude", std::to_string(gravity_magnitude_));
-            logger_.addMetadata("Config: Use GPS Instead of UWB", use_gps_instead_of_uwb_ ? "True" : "False");
+            logger_.addMetadata("Config: Use GPS ", use_gps_ ? "True" : "False");
             logger_.addMetadata("Config: Use GPS Orientation as Initial", use_gps_orientation_as_initial_ ? "True" : "False");
             logger_.addMetadata("Config: Use GPS Orientation as Constraint", use_gps_orientation_as_constraint_ ? "True" : "False");
             logger_.addMetadata("Config: Use GPS Velocity", use_gps_velocity_ ? "True" : "False");
             logger_.addMetadata("Config: IMU Topic", imu_topic_);
             logger_.addMetadata("Config: GPS Topic", gps_topic_);
             logger_.addMetadata("Config: Ground Truth Topic", gt_topic_);
-            logger_.addMetadata("Config: UWB Topic", uwb_topic_);
             logger_.addMetadata("Config: World Frame ID", world_frame_id_);
             logger_.addMetadata("Config: Body Frame ID", body_frame_id_);
             logger_.addMetadata("Config: IMU Acc Noise", std::to_string(imu_acc_noise_));
@@ -1418,7 +1383,6 @@ public:
             logger_.addMetadata("Config: GPS Pos Noise", std::to_string(gps_position_noise_));
             logger_.addMetadata("Config: GPS Vel Noise", std::to_string(gps_velocity_noise_));
             logger_.addMetadata("Config: GPS Orient Noise", std::to_string(gps_orientation_noise_));
-            logger_.addMetadata("Config: UWB Pos Noise", std::to_string(uwb_position_noise_));
             logger_.addMetadata("Config: Initial Acc Bias X", std::to_string(initial_acc_bias_x_));
             logger_.addMetadata("Config: Initial Acc Bias Y", std::to_string(initial_acc_bias_y_));
             logger_.addMetadata("Config: Initial Acc Bias Z", std::to_string(initial_acc_bias_z_));
@@ -1467,32 +1431,29 @@ public:
         initial_gyro_bias_ = Eigen::Vector3d(initial_gyro_bias_x_, initial_gyro_bias_y_, initial_gyro_bias_z_);
         
         // Initialize subscribers and publishers based on mode
-        imu_sub_ = nh.subscribe(imu_topic_, imu_queue_size_, &UwbImuFusion::imuCallback, this);
+        imu_sub_ = nh.subscribe(imu_topic_, imu_queue_size_, &GNSSImuFusion::imuCallback, this);
         
-        if (use_gps_instead_of_uwb_) {
+        if (use_gps_) {
             if (gnss_message_type_ == "inspvax") {
-                gnss_sub_ = nh.subscribe(gnss_topic_, gnss_queue_size_, &UwbImuFusion::inspvaxCallback, this);
+                gnss_sub_ = nh.subscribe(gnss_topic_, gnss_queue_size_, &GNSSImuFusion::inspvaxCallback, this);
                 ROS_INFO("Subscribing to GNSS topic [novatel_msgs/INSPVAX]: %s", gnss_topic_.c_str());
             } else if (gnss_message_type_ == "gnss_comm") {
-                gnss_sub_ = nh.subscribe(gnss_topic_, gnss_queue_size_, &UwbImuFusion::gnssCommCallback, this);
+                gnss_sub_ = nh.subscribe(gnss_topic_, gnss_queue_size_, &GNSSImuFusion::gnssCommCallback, this);
                 ROS_INFO("Subscribing to GNSS topic [gnss_comm/GnssPVTSolnMsg]: %s", gnss_topic_.c_str());
             } else if (gnss_message_type_ == "odometry") {
-                gnss_sub_ = nh.subscribe(gnss_topic_, gnss_queue_size_, &UwbImuFusion::odometryCallback, this);
+                gnss_sub_ = nh.subscribe(gnss_topic_, gnss_queue_size_, &GNSSImuFusion::odometryCallback, this);
                 ROS_INFO("Subscribing to GNSS topic [nav_msgs/Odometry]: %s", gnss_topic_.c_str());
             } else {
                 ROS_ERROR("Unsupported gps_message_type: %s. GPS fusion disabled.", gnss_message_type_.c_str());
-                use_gps_instead_of_uwb_ = false;
+                use_gps_ = false;
             }
             if (subscribe_to_ground_truth_) {
-                ground_truth_sub_ = nh.subscribe(ground_truth_topic_, gnss_queue_size_, &UwbImuFusion::groundTruthCallback, this);
+                ground_truth_sub_ = nh.subscribe(ground_truth_topic_, gnss_queue_size_, &GNSSImuFusion::groundTruthCallback, this);
                 ROS_INFO("Subscribing to Ground Truth topic [novatel_msgs/INSPVAX]: %s", ground_truth_topic_.c_str());
             }
 
         } else {
-            uwb_sub_ = nh.subscribe(uwb_topic_, uwb_queue_size_, &UwbImuFusion::uwbCallback, this);
-            ROS_INFO("Using UWB+IMU fusion mode");
-            ROS_INFO("Subscribing to UWB topic: %s (queue: %d)", uwb_topic_.c_str(), uwb_queue_size_);
-            ROS_INFO("UWB position noise: %.3f m", uwb_position_noise_);
+            ROS_WARN("GPS fusion is disabled. The system will rely solely on IMU data.");
         }
 
         
@@ -1547,9 +1508,9 @@ public:
         
         // Setup optimization timer
         optimization_timer_ = nh.createTimer(ros::Duration(1.0/optimization_frequency_), 
-                                           &UwbImuFusion::optimizationTimerCallback, this);
+                                           &GNSSImuFusion::optimizationTimerCallback, this);
         
-        ROS_INFO("UWB/GPS-IMU Fusion node initialized with IMU-rate pose publishing");
+        ROS_INFO("GNSS-IMU Fusion node initialized with IMU-rate pose publishing");
         ROS_INFO("Subscribing to IMU topic: %s (queue: %d)", imu_topic_.c_str(), imu_queue_size_);
         ROS_INFO("Publishing to optimized pose topic: %s", optimized_pose_topic_.c_str());
         ROS_INFO("Publishing to IMU pose topic: %s", imu_pose_topic_.c_str());
@@ -1581,7 +1542,7 @@ public:
         ROS_INFO("Optimized for high-speed scenarios (0-70 km/h)");
     }
 
-    ~UwbImuFusion() {
+    ~GNSSImuFusion() {
         // Clean up marginalization resources
         if (last_marginalization_info_) {
             delete last_marginalization_info_;
@@ -1600,8 +1561,8 @@ public:
     }
 
 private:
-    // GPS/UWB mode selection
-    bool use_gps_instead_of_uwb_;
+    // GPS mode selection
+    bool use_gps_;
     
     // GPS data usage configuration
     bool use_gps_orientation_as_initial_;
@@ -1652,7 +1613,6 @@ private:
 
     // ROS subscribers and publishers
     ros::Subscriber imu_sub_;
-    ros::Subscriber uwb_sub_;
     ros::Publisher optimized_pose_pub_;
     ros::Publisher imu_pose_pub_;
     ros::Publisher imu_path_pub_;
@@ -1695,9 +1655,7 @@ private:
 
     // Topic names and queue sizes
     std::string imu_topic_;
-    std::string uwb_topic_;
     int imu_queue_size_;
-    int uwb_queue_size_;
     std::string optimized_pose_topic_;
     std::string imu_pose_topic_;
     int optimized_pose_queue_size_;
@@ -1713,7 +1671,6 @@ private:
     double gyro_bias_max_;     // Maximum allowed gyroscope bias
     double initial_acc_bias_x_, initial_acc_bias_y_, initial_acc_bias_z_;
     double initial_gyro_bias_x_, initial_gyro_bias_y_, initial_gyro_bias_z_;
-    double uwb_position_noise_;
     int optimization_window_size_;
     double optimization_frequency_;
     double imu_buffer_time_length_;
@@ -1810,15 +1767,7 @@ private:
     std::string bias_path;
     std::ofstream bias_fs;
     
-    // UWB measurements
-    struct UwbMeasurement {
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        Eigen::Vector3d position;
-        double timestamp;
-    };
-
-    std::vector<UwbMeasurement> uwb_measurements_;
-
+    // Store GPS measurements for processing
     std::vector<GnssMeasurement> gps_measurements_;
     int gps_measurement_count_=0;
 
@@ -2370,7 +2319,7 @@ private:
     
     // ==================== GPS-RELATED METHODS ====================
 
-    // Add to the UwbImuFusion class private section:
+    // Add to the GNSSImuFusion class private section:
     void testGpsVelocityCalculation() {
         if (gps_measurements_.empty()) {
             ROS_WARN("No GPS data available for velocity test");
@@ -3073,7 +3022,6 @@ private:
             current_state_.timestamp = 0;
             
             state_window_.clear();
-            uwb_measurements_.clear();
             gps_measurements_.clear();  // Clear GPS measurements
             imu_buffer_.clear();
             // preintegration_map_.clear();
@@ -3258,163 +3206,6 @@ private:
             ROS_ERROR("Exception in imuCallback: %s", e.what());
         }
     }
-
-    void uwbCallback(const geometry_msgs::PointStamped::ConstPtr& msg) {
-        try {
-            std::lock_guard<std::mutex> lock(data_mutex_);
-            
-            // Skip if we're in GPS mode
-            if (use_gps_instead_of_uwb_) {
-                return;
-            }
-            
-            // Store UWB position measurement
-            UwbMeasurement measurement;
-            measurement.position = Eigen::Vector3d(msg->point.x, msg->point.y, msg->point.z);
-            measurement.timestamp = msg->header.stamp.toSec();
-            
-            // Ensure timestamp is valid
-            if (measurement.timestamp <= 0) {
-                ROS_WARN("Invalid UWB timestamp: %f, using current time", measurement.timestamp);
-                measurement.timestamp = ros::Time::now().toSec();
-            }
-            
-            // Limit size of UWB measurements buffer
-            if (uwb_measurements_.size() > 100) {
-                uwb_measurements_.erase(uwb_measurements_.begin(), uwb_measurements_.begin() + 50);
-            }
-            
-            // Add to UWB measurements list
-            uwb_measurements_.push_back(measurement);
-            
-            // Initialize if not yet initialized
-            if (!is_initialized_) {
-                ROS_INFO("Initializing system with UWB measurement at timestamp: %f", measurement.timestamp);
-                initializeFromUwb(measurement);
-                is_initialized_ = true;
-                return;
-            }
-            
-            // Create a new keyframe at each UWB measurement
-            if (is_initialized_ && has_imu_data_) {
-                createKeyframe(measurement);
-            }
-            
-        } catch (const std::exception& e) {
-            ROS_ERROR("Exception in uwbCallback: %s", e.what());
-        }
-    }
-    
-    // Create a keyframe (state) based on UWB measurement
-    void createKeyframe(const UwbMeasurement& uwb) {
-        try {
-            // Skip if we already have a keyframe at this time
-            for (const auto& state : state_window_) {
-                if (std::abs(state.timestamp - uwb.timestamp) < 0.005) {
-                    return; // Already have a keyframe for this UWB measurement
-                }
-            }
-            
-            // Skip if the state window is empty
-            if (state_window_.empty()) {
-                // Create initial keyframe from current state
-                State new_state = current_state_;
-                new_state.position = uwb.position;
-                new_state.timestamp = uwb.timestamp;
-                
-                // Initialize with a reasonable velocity but don't force direction
-                if (new_state.velocity.norm() < min_horizontal_velocity_ * 0.5) {
-                    new_state.velocity = Eigen::Vector3d(min_horizontal_velocity_, 0, 0);
-                }
-                
-                // Find closest IMU measurement for orientation
-                sensor_msgs::Imu closest_imu = findClosestImuMeasurement(uwb.timestamp);
-                
-                // If we have a valid IMU message, use its orientation
-                if (closest_imu.header.stamp.toSec() > 0) {
-                    new_state.orientation = Eigen::Quaterniond(
-                        closest_imu.orientation.w,
-                        closest_imu.orientation.x,
-                        closest_imu.orientation.y,
-                        closest_imu.orientation.z
-                    ).normalized();
-                }
-                
-                state_window_.push_back(new_state);
-                ROS_DEBUG("Added first UWB-based keyframe at t=%.3f", uwb.timestamp);
-                return;
-            }
-            
-            // Calculate the time difference from the previous keyframe
-            double dt = uwb.timestamp - state_window_.back().timestamp;
-            
-            // Skip if the time difference is too small
-            if (dt < 0.01) {
-                return;
-            }
-            
-            // Compute the propagated state at the UWB timestamp
-            State propagated_state = propagateState(state_window_.back(), uwb.timestamp);
-            
-            // Set the UWB position while keeping the propagated orientation and velocity
-            propagated_state.position = uwb.position;
-            propagated_state.timestamp = uwb.timestamp;
-            
-            // Find closest IMU measurement for orientation updating
-            sensor_msgs::Imu closest_imu = findClosestImuMeasurement(uwb.timestamp);
-            
-            // If the IMU measurement is close enough, use its orientation
-            if (closest_imu.header.stamp.toSec() > 0) {
-                double imu_time_diff = std::abs(closest_imu.header.stamp.toSec() - uwb.timestamp);
-                if (imu_time_diff < 0.05) { // 50ms threshold
-                    propagated_state.orientation = Eigen::Quaterniond(
-                        closest_imu.orientation.w,
-                        closest_imu.orientation.x,
-                        closest_imu.orientation.y,
-                        closest_imu.orientation.z
-                    ).normalized();
-                }
-            }
-            
-            // CRITICAL: Ensure biases are reasonable in the new keyframe
-            clampBiases(propagated_state.acc_bias, propagated_state.gyro_bias);
-            
-            // CRITICAL: Ensure velocity is reasonable but preserve direction
-            double adaptive_max_velocity = max_velocity_;
-            // For high-speed scenarios, estimate max velocity from IMU data
-            if (imu_buffer_.size() > 10) {
-                adaptive_max_velocity = estimateMaxVelocityFromImu();
-            }
-            clampVelocity(propagated_state.velocity, adaptive_max_velocity);
-            
-            // Add to state window, with marginalization if needed
-            if (state_window_.size() >= optimization_window_size_) {
-                if (enable_marginalization_) {
-                    // Prepare marginalization before removing the oldest state
-                    prepareMarginalization();
-                }
-                state_window_.pop_front();
-            }
-            
-            state_window_.push_back(propagated_state);
-            
-            // Update current state
-            current_state_ = propagated_state;
-            
-            // Update preintegration between the last two keyframes
-            if (state_window_.size() >= 2) {
-                size_t n = state_window_.size();
-                double start_time = state_window_[n-2].timestamp;
-                double end_time = state_window_[n-1].timestamp;
-                
-                // Store preintegration data for optimization
-                performPreintegrationBetweenKeyframes_(start_time, end_time);
-            }
-            
-        } catch (const std::exception& e) {
-            ROS_ERROR("Exception in createKeyframe: %s", e.what());
-        }
-    }
     
     // Prepare marginalization by adding factors connected to the oldest state
     void prepareMarginalization() {
@@ -3492,7 +3283,7 @@ private:
                 bias_param2[5] = next_state.gyro_bias.z();
                 
                 // Add position factor for the oldest state based on fusion mode
-                if (use_gps_instead_of_uwb_) {
+                if (use_gps_) {
                     double keyframe_time = oldest_state.timestamp;
                         std::optional<GnssMeasurement> matching_gps_meas;
                     for (const auto& gps : gps_measurements_) {
@@ -3534,22 +3325,7 @@ private:
                         }
                     }
                 } else {
-                    // Add UWB position factor
-                    for (const auto& uwb : uwb_measurements_) {
-                        if (std::abs(uwb.timestamp - oldest_state.timestamp) < 0.01) {
-                            // Create UWB factor
-                            ceres::CostFunction* uwb_factor = UwbPositionFactor::Create(
-                                uwb.position, uwb_position_noise_);
-                            
-                            std::vector<double*> parameter_blocks = {pose_param1};
-                            std::vector<int> drop_set = {0}; // Drop the pose parameter
-                            
-                            auto* residual_info = new ResidualBlockInfo(
-                                uwb_factor, nullptr, parameter_blocks, drop_set);
-                            marginalization_info->addResidualBlockInfo(residual_info);
-                            break;
-                        }
-                    }
+                    ROS_WARN_THROTTLE(5.0, "GPS position factor not added during marginalization because GPS is disabled.");
                 }
                 
                 // Add IMU factor between oldest state and second oldest state
@@ -3758,7 +3534,7 @@ private:
             }
             
             // Reset position if large drift detected
-            if (use_gps_instead_of_uwb_) {
+            if (use_gps_) {
                 // Check GPS drift
                 if (!gps_measurements_.empty() && !state_window_.empty()) {
                     const auto& latest_gps = gps_measurements_.back();
@@ -3782,30 +3558,7 @@ private:
                     // }
                 }
             } else {
-                // Check UWB drift
-                if (!uwb_measurements_.empty() && !state_window_.empty()) {
-                    const auto& latest_uwb = uwb_measurements_.back();
-                    auto& latest_state = state_window_.back();
-                    
-                    double position_error_z = std::abs(latest_state.position.z() - latest_uwb.position.z());
-                    double position_error_xy = (latest_state.position.head<2>() - latest_uwb.position.head<2>()).norm();
-                    
-                    // Adjust position drift threshold for high-speed scenarios
-                    double adaptive_drift_threshold = 1.0; // Default threshold
-                    double velocity_norm = latest_state.velocity.norm();
-                    
-                    // Increase allowable drift at higher speeds
-                    if (velocity_norm > 10.0) {
-                        adaptive_drift_threshold = 1.0 + (velocity_norm - 10.0) * 0.1;
-                        adaptive_drift_threshold = std::min(adaptive_drift_threshold, 3.0); // Cap at 3 meters
-                    }
-                    
-                    if (position_error_z > adaptive_drift_threshold || position_error_xy > adaptive_drift_threshold) {
-                        ROS_WARN("Position drift detected: Z=%.2f meters, XY=%.2f meters. Resetting to UWB position.", 
-                                position_error_z, position_error_xy);
-                        resetStateToUwb(latest_uwb);
-                    }
-                }
+                    ROS_WARN_THROTTLE(10.0, "GPS data not available for drift correction.");
             }
             
             // // Compute preintegration data between keyframes
@@ -3869,7 +3622,7 @@ private:
                 publishOptimizedPose();
 
                 // After optimization, calculate and visualize errors with GPS
-                if (use_gps_instead_of_uwb_) {
+                if (use_gps_) {
                     calculateAndVisualizePositionError();
                     if (use_gps_velocity_) {
                         calculateAndVisualizeVelocityError();
@@ -3879,57 +3632,6 @@ private:
         } catch (const std::exception& e) {
             ROS_ERROR("Exception in optimizationTimerCallback: %s", e.what());
         }
-    }
-
-    // Reset state to UWB if drift is too large
-    void resetStateToUwb(const UwbMeasurement& uwb) {
-        // Create a reset state that keeps orientation and biases but uses UWB position
-        State reset_state = current_state_;
-        reset_state.position = uwb.position;
-        
-        // Keep existing velocity direction but reduce magnitude
-        double velocity_norm = reset_state.velocity.norm();
-        if (velocity_norm > 0.1) {
-            reset_state.velocity.normalize();
-            reset_state.velocity *= std::min(min_horizontal_velocity_ * 2.0, velocity_norm * 0.5);
-        } else {
-            // Initialize with horizontal velocity in direction of orientation if velocity is very small
-            double yaw = atan2(2.0 * (reset_state.orientation.w() * reset_state.orientation.z() + 
-                           reset_state.orientation.x() * reset_state.orientation.y()),
-                    1.0 - 2.0 * (reset_state.orientation.y() * reset_state.orientation.y() + 
-                             reset_state.orientation.z() * reset_state.orientation.z()));
-            
-            reset_state.velocity.x() = min_horizontal_velocity_ * cos(yaw);
-            reset_state.velocity.y() = min_horizontal_velocity_ * sin(yaw);
-            reset_state.velocity.z() = 0;
-        }
-        
-        // Reset all states in the window
-        for (auto& state : state_window_) {
-            State new_state = reset_state;
-            new_state.timestamp = state.timestamp;
-            
-            // Keep original biases
-            new_state.acc_bias = state.acc_bias;
-            new_state.gyro_bias = state.gyro_bias;
-            
-            // Ensure biases are reasonable
-            clampBiases(new_state.acc_bias, new_state.gyro_bias);
-            
-            state = new_state;
-        }
-        
-        current_state_ = reset_state;
-        preintegration_map_test.clear();
-        
-        // Reset marginalization as well
-        if (last_marginalization_info_) {
-            delete last_marginalization_info_;
-            last_marginalization_info_ = nullptr;
-        }
-        
-        // Reset visualization
-        resetVisualization();
     }
 
     // IMPROVED: Reset state to GPS with smoother position transition
@@ -4033,71 +3735,6 @@ private:
         ROS_INFO("State reset to GPS: position=[%.2f, %.2f, %.2f], using orientation=%s, velocity=%s",
                 reset_state.position.x(), reset_state.position.y(), reset_state.position.z(),
                 use_gps_orientation_as_initial_ ? "true" : "false", use_gps_velocity_ ? "true" : "false");
-    }
-
-    void initializeFromUwb(const UwbMeasurement& uwb) {
-        try {
-            // Initialize state using UWB position
-            current_state_.position = uwb.position;
-            current_state_.orientation = Eigen::Quaterniond::Identity();
-            
-            // Initialize with non-zero velocity but we don't force a particular direction
-            current_state_.velocity = Eigen::Vector3d(min_horizontal_velocity_, 0, 0);
-            
-            // Initialize with proper non-zero biases
-            current_state_.acc_bias = initial_acc_bias_;
-            current_state_.gyro_bias = initial_gyro_bias_;
-            
-            current_state_.timestamp = uwb.timestamp;
-            
-            // Get initial orientation from IMU if available
-            sensor_msgs::Imu closest_imu = findClosestImuMeasurement(uwb.timestamp);
-            if (closest_imu.header.stamp.toSec() > 0 && 
-                closest_imu.orientation_covariance[0] != -1) {
-                
-                current_state_.orientation = Eigen::Quaterniond(
-                    closest_imu.orientation.w,
-                    closest_imu.orientation.x,
-                    closest_imu.orientation.y,
-                    closest_imu.orientation.z
-                ).normalized();
-                
-                ROS_INFO("Using IMU orientation for initialization");
-            }
-            
-            state_window_.clear(); // Ensure clean state window
-            state_window_.push_back(current_state_);
-            
-            // Reset marginalization
-            if (last_marginalization_info_) {
-                delete last_marginalization_info_;
-                last_marginalization_info_ = nullptr;
-            }
-            
-            // Reset optimization count
-            optimization_count_ = 0;
-            
-            // Reset visualization
-            resetVisualization();
-            
-            ROS_INFO("State initialized at position [%.2f, %.2f, %.2f]", 
-                    current_state_.position.x(), 
-                    current_state_.position.y(), 
-                    current_state_.position.z());
-            ROS_INFO("Initial velocity [%.2f, %.2f, %.2f]",
-                    current_state_.velocity.x(),
-                    current_state_.velocity.y(),
-                    current_state_.velocity.z());
-            ROS_INFO("Initial biases: acc=[%.3f, %.3f, %.3f], gyro=[%.4f, %.4f, %.4f]",
-                    current_state_.acc_bias.x(),
-                    current_state_.acc_bias.y(),
-                    current_state_.acc_bias.z(),
-                    current_state_.gyro_bias.x(),
-                    current_state_.gyro_bias.y(),
-                    current_state_.gyro_bias.z());
-        } catch (const std::exception& e) {
-            ROS_ERROR("Exception in initializeFromUwb: %s", e.what());
-        }
     }
 
     // Optimization using Ceres solver
@@ -4205,7 +3842,7 @@ private:
             }
             
             // Add position measurements based on fusion mode
-            if (use_gps_instead_of_uwb_) {
+            if (use_gps_) {
                 for (size_t i = 0; i < state_window_.size(); ++i) {
                     double keyframe_time = state_window_[i].timestamp;
                     
@@ -4319,23 +3956,7 @@ private:
                     }
                 }
             }else {
-                // Original UWB position factors
-                for (size_t i = 0; i < state_window_.size(); ++i) {
-                    double keyframe_time = state_window_[i].timestamp;
-                    
-                    // Find matching UWB measurement
-                    for (const auto& uwb : uwb_measurements_) {
-                        if (std::abs(uwb.timestamp - keyframe_time) < 0.01) { // 10ms tolerance
-                            ceres::CostFunction* uwb_factor = UwbPositionFactor::Create(
-                                uwb.position, uwb_position_noise_);
-                            
-                            // Use HuberLoss for robustness
-                            ceres::LossFunction* loss_function = new ceres::HuberLoss(0.1);
-                            problem.AddResidualBlock(uwb_factor, loss_function, variables[i].pose);
-                            break;
-                        }
-                    }
-                }
+                    ROS_WARN_THROTTLE(10.0, "GPS data not available for position measurements.");
             }
             
             // Add roll/pitch constraint to enforce planar motion if enabled
@@ -4725,7 +4346,7 @@ private:
                 //         vel_norm, vel_norm * 3.6);
                 
                 // If we have GPS data, compare with GPS velocity
-                if (use_gps_instead_of_uwb_ && !gps_measurements_.empty()) {
+                if (use_gps_ && !gps_measurements_.empty()) {
                     // Find closest GPS measurement to current time
                     double min_time_diff = std::numeric_limits<double>::max();
                     GnssMeasurement closest_gps;
@@ -5433,10 +5054,10 @@ private:
 
 int main(int argc, char **argv) {
     try {
-        ros::init(argc, argv, "uwb_imu_sw_node");
+        ros::init(argc, argv, "gnss_imu_sw_node");
         
         {
-            UwbImuFusion fusion; 
+            GNSSImuFusion fusion; 
             ros::spin();
         }
         

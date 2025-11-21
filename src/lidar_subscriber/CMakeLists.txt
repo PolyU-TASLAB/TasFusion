@@ -76,29 +76,29 @@ if(Glog_FOUND)
 endif()
 
 ## Declare C++ executables
-add_executable(uwb_imu_sw_node src/uwb_imu_sw_node.cpp)
+add_executable(gnss_imu_sw_node src/gnss_imu_sw_node.cpp)
 
 ## Set C++17 for specific targets
-set_property(TARGET uwb_imu_sw_node PROPERTY CXX_STANDARD 17)
+set_property(TARGET gnss_imu_sw_node PROPERTY CXX_STANDARD 17)
 
 ## Add cmake target dependencies of the executables
-add_dependencies(uwb_imu_sw_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(gnss_imu_sw_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-## Specify libraries to link for uwb_imu_sw_node
-target_link_libraries(uwb_imu_sw_node
+## Specify libraries to link for gnss_imu_sw_node
+target_link_libraries(gnss_imu_sw_node
   ${catkin_LIBRARIES}
   ${CERES_LIBRARIES}
 )
 
 # Add GFLAGS and GLOG libraries if found
 if(Gflags_FOUND)
-  target_link_libraries(uwb_imu_sw_node ${GFLAGS_LIBRARIES})
+  target_link_libraries(gnss_imu_sw_node ${GFLAGS_LIBRARIES})
 endif()
 if(Glog_FOUND)
-  target_link_libraries(uwb_imu_sw_node ${GLOG_LIBRARIES})
+  target_link_libraries(gnss_imu_sw_node ${GLOG_LIBRARIES})
 endif()
 
-install(TARGETS uwb_imu_sw_node
+install(TARGETS gnss_imu_sw_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

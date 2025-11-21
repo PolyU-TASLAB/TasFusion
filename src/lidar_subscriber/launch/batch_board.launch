@@ -5,7 +5,6 @@
 
     <arg name="imu_topic" default="/imu_gnss_driver/imu1/data" />
     <arg name="gps_topic" default="/ublox_driver/receiver_pvt" />
-    <arg name="uwb_topic" default="/sensor_simulator/UWBPoistionPS" />
 
     <arg name="subscribe_to_ground_truth" default="false" />
     <arg name="ground_truth_topic" default="/novatel_data/inspvax" />
@@ -15,8 +14,6 @@
 
     <arg name="gps_position_noise" default="0.01" doc="Default GPS position noise (m)" />
     <arg name="gps_velocity_noise" default="0.001" doc="Default GPS velocity noise (m/s)" />
-    <arg name="uwb_position_noise" default="0.1" doc="UWB position noise (m)" />
-
 
     <arg name="gravity_magnitude" default="9.785" doc="Gravity acceleration magnitude (m/s^2)" />
 
@@ -73,12 +70,11 @@
 
     <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(find toyslam)/rviz/gps_trajectory.rviz" />
 
-    <node name="uwb_imu_sw_node" pkg="toyslam" type="uwb_imu_sw_node" output="screen">
-        <param name="use_gps_instead_of_uwb" value="$(arg use_gps)" />
+    <node name="gnss_imu_sw_node" pkg="toyslam" type="gnss_imu_sw_node" output="screen">
+        <param name="use_gps" value="$(arg use_gps)" />
         
         <param name="imu_topic" value="$(arg imu_topic)" />
         <param name="gps_topic" value="$(arg gps_topic)" />
-        <param name="uwb_topic" value="$(arg uwb_topic)" />
         <param name="gps_message_type" value="$(arg gps_message_type)" />
 
         <param name="world_frame_id" value="$(arg world_frame_id)" />
@@ -108,7 +104,6 @@
         <param name="enable_velocity_constraint" value="$(arg enable_velocity_constraint)" />
         <param name="gps_position_noise" value="$(arg gps_position_noise)" />
         <param name="gps_velocity_noise" value="$(arg gps_velocity_noise)" />
-        <param name="uwb_position_noise" value="$(arg uwb_position_noise)" />
 
         <param name="gravity_magnitude" value="$(arg gravity_magnitude)" />
         <param name="max_velocity" value="$(arg max_velocity)" />

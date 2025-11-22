@@ -5,7 +5,7 @@ IMAGE_NAME="gnssboard-dev"
 CONTAINER_NAME="gnssboard_container"
 
 # Define local output directory (使用绝对路径)
-LOCAL_OUTPUT_DIR="$HOME/Documents/is_board_data/csv_logs"
+LOCAL_OUTPUT_DIR="$(find toyslam)/../data"
 
 # Create local output directory if it doesn't exist
 mkdir -p "$LOCAL_OUTPUT_DIR"
@@ -27,17 +27,17 @@ elif [ "$(docker ps -aq -f status=exited -f name=$CONTAINER_NAME)" ]; then
 # Otherwise, create and run a new container
 else
     echo "Running a new container: $CONTAINER_NAME"
-    echo "Mounting local output directory: $LOCAL_OUTPUT_DIR -> /data/output"
+    echo "Mounting local output directory: $LOCAL_OUTPUT_DIR -> /data/"
     docker run -it \
         --name $CONTAINER_NAME \
         --rm \
         --net=host \
         --privileged \
         -e "DISPLAY=$DISPLAY" \
-        -e "CSV_OUTPUT_DIR=/data/output" \
+        -e "CSV_OUTPUT_DIR=/data/" \
         -v "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
         -v "$(pwd)":/root/catkin_ws \
-        -v "$LOCAL_OUTPUT_DIR":/data/output \
+        -v "$LOCAL_OUTPUT_DIR":/data/ \
         $IMAGE_NAME
 fi
 

@@ -39,7 +39,7 @@ struct GnssMeasurement {
     bool orientation_valid = false;
 };
 
-// --- 抽象基类 (现在只包含通用工具) ---
+// --- Abstract base class (currently only contains common utilities) ---
 class GnssParser {
 public:
     virtual ~GnssParser() = default;
@@ -92,7 +92,7 @@ protected:
     }
 };
 
-// --- 具体解析器 (parse方法参数已修改) ---
+// --- Specific parser (parse method parameter modified) ---
 class GnssCommParser : public GnssParser {
 public:
     std::optional<GnssMeasurement> parse(const gnss_comm::GnssPVTSolnMsg::ConstPtr& msg) {
@@ -113,7 +113,7 @@ public:
 
         meas.velocity = Eigen::Vector3d(msg->vel_e, msg->vel_n, -msg->vel_d);
         meas.velocity_valid = true;
-        // MODIFIED: 从标准差构建对角协方差矩阵
+        // MODIFIED: Construct diagonal covariance matrix from standard deviations
         meas.velocity_covariance.setZero();
         meas.velocity_covariance(0, 0) = msg->vel_acc * msg->vel_acc; // East
         meas.velocity_covariance(1, 1) = msg->vel_acc * msg->vel_acc; // North
@@ -150,7 +150,7 @@ public:
         meas.velocity_covariance(1, 1) = msg->north_velocity_std * msg->north_velocity_std;
         meas.velocity_covariance(2, 2) = msg->up_velocity_std * msg->up_velocity_std;
 
-        // ... (姿态和姿态不确定性的转换)
+        // ... (Conversion of orientation and orientation uncertainty)
         meas.orientation_valid = true;
         // meas.orientation = Eigen::Quaterniond(
         //     msg->orientation.w, msg->orientation.x, msg->orientation.y, msg->orientation.z);
@@ -205,27 +205,27 @@ public:
         meas.position_valid = true;
         meas.velocity_valid = true;
         
-        // --- 协方差转换 ---
+        // --- Covariance transformation ---
         Eigen::Matrix3d R = m_gnss_tools_.ecef2enuRotation(this->enu_ref_);
 
-        // nav_msgs/Odometry 的协方差是 6x6 row-major 矩阵.
-        // 位置部分是 [0, 1, 2] 行/列.
+        // nav_msgs/Odometry covariance is a 6x6 row-major matrix.
+        // Position part is rows/columns [0, 1, 2].
         Eigen::Matrix3d pose_cov_ecef;
         pose_cov_ecef(0,0) = msg->pose.covariance[0];  pose_cov_ecef(0,1) = msg->pose.covariance[1];  pose_cov_ecef(0,2) = msg->pose.covariance[2];
         pose_cov_ecef(1,0) = msg->pose.covariance[6];  pose_cov_ecef(1,1) = msg->pose.covariance[7];  pose_cov_ecef(1,2) = msg->pose.covariance[8];
         pose_cov_ecef(2,0) = msg->pose.covariance[12]; pose_cov_ecef(2,1) = msg->pose.covariance[13]; pose_cov_ecef(2,2) = msg->pose.covariance[14];
         
-        // MODIFIED: 直接存储旋转后的完整协方差矩阵
+        // MODIFIED: Directly store the fully rotated covariance matrix
         meas.position_covariance = R * pose_cov_ecef * R.transpose();
 
-        // MODIFIED: 从ROS消息中提取完整的3x3速度协方差
-        // 速度部分是 [0, 1, 2] 行/列，在 twist.covariance 中
+        // MODIFIED: Extract full 3x3 velocity covariance from ROS message
+        // Velocity part is rows/columns [0, 1, 2] in twist.covariance
         Eigen::Matrix3d vel_cov_ecef;
         vel_cov_ecef(0,0) = msg->twist.covariance[0];  vel_cov_ecef(0,1) = msg->twist.covariance[1];  vel_cov_ecef(0,2) = msg->twist.covariance[2];
         vel_cov_ecef(1,0) = msg->twist.covariance[6];  vel_cov_ecef(1,1) = msg->twist.covariance[7];  vel_cov_ecef(1,2) = msg->twist.covariance[8];
         vel_cov_ecef(2,0) = msg->twist.covariance[12]; vel_cov_ecef(2,1) = msg->twist.covariance[13]; vel_cov_ecef(2,2) = msg->twist.covariance[14];
         
-        // MODIFIED: 直接存储旋转后的完整协方差矩阵
+        // MODIFIED: Directly store the fully rotated covariance matrix
         meas.velocity_covariance = R * vel_cov_ecef * R.transpose();
 
         return meas;

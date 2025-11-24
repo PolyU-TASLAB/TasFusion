@@ -1,6 +1,0 @@
-[submodule "src/novatel_span_driver"]
-	path = src/novatel_span_driver
-	url = https://github.com/ros-drivers/novatel_span_driver.git
-[submodule "src/gnss_comm"]
-	path = src/gnss_comm
-	url = https://github.com/HKUST-Aerial-Robotics/gnss_comm.git

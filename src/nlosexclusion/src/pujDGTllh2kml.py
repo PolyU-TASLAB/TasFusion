@@ -61,19 +61,19 @@ if __name__ == '__main__':
 	if( len(pullh2kml_eval_.lon_)>5):
             # print 'finished...and begin to write llh to kml'
             pullh2kml_eval_.writeToKML = 1
-            # 使用第一个点创建Folder
+            # Use the first point to create a Folder
             fold = KML.Folder(KML.Placemark(
                 KML.Point(KML.coordinates(str(pullh2kml_eval_.lon_[0]) + ',' + str(pullh2kml_eval_.lat_[0]) + ',0'))
             )
             )
-            # 将剩余的点追加到Folder中
+            # Append the remaining points to the Folder
             for i in range(1, len(pullh2kml_eval_.lon_)):
                 fold.append(KML.Placemark(
                     KML.Point(KML.coordinates(str(pullh2kml_eval_.lon_[i]) + ',' + str(pullh2kml_eval_.lat_[i]) + ',0')))
                 )
-            # 使用etree将KML节点输出为字符串数据
+            # Use etree to output the KML node as string data
             content = etree.tostring(etree.ElementTree(fold), pretty_print=True)
-            # 保存到文件，然后就可以在Google地球中打开了
+            # Save to file, then it can be opened in Google Earth
             with open('/home/wws/software_tim2/librsfllh_trajectory.kml', 'w') as fp:
                 fp.write(content)
 

@@ -1,0 +1,55 @@
+//////////////////////////////////////////////////////////////////////
+//                  STATIC CONFIGURATION PARAMETERS                   //
+// Logged at: 2025-11-24 06:50:28 UTC                            //
+//////////////////////////////////////////////////////////////////////
+
+[Metadata]
+Config: Bias Constraint Weight: 1000.000000
+Config: Bias Correction Threshold: 0.050000
+Config: Bias Max Acc: 1.100000
+Config: Bias Max Gyro: 1.010000
+Config: Body Frame ID: base_link
+Config: Enable Bias Estimation: True
+Config: Enable Horizontal Velocity Incentive: False
+Config: Enable IMU Orientation Factor: False
+Config: Enable Marginalization: True
+Config: Enable Orientation Smoothness Factor: False
+Config: Enable Roll/Pitch Constraint: False
+Config: Enable Velocity Constraint: False
+Config: GPS Orient Noise: 0.000000
+Config: GPS Pos Noise: 0.010000
+Config: GPS Topic: 
+Config: GPS Vel Noise: 0.001000
+Config: Gravity Alignment Weight: 150.000000
+Config: Gravity Magnitude: 9.785000
+Config: Ground Truth Topic: 
+Config: Horizontal Velocity Weight: 10.000000
+Config: IMU Acc Bias Noise: 0.000800
+Config: IMU Acc Noise: 0.015000
+Config: IMU Gyro Bias Noise: 0.001700
+Config: IMU Gyro Noise: 0.120000
+Config: IMU Orientation Weight: 50.000000
+Config: IMU Topic: /imu_gnss_driver/imu1/data
+Config: Initial Acc Bias X: 0.000000
+Config: Initial Acc Bias Y: 0.000000
+Config: Initial Acc Bias Z: 0.000000
+Config: Initial Gyro Bias X: 0.000000
+Config: Initial Gyro Bias Y: 0.000000
+Config: Initial Gyro Bias Z: 0.000000
+Config: Max Integration dt: 0.005000
+Config: Max Iterations (Param): 30
+Config: Max Velocity Setting: 55.000000
+Config: Min Horizontal Velocity: 0.000000
+Config: Optimization Frequency (Hz): 1.000000
+Config: Optimization Window Size: 10
+Config: Orientation Smoothness Weight: 100.000000
+Config: Roll/Pitch Weight: 300.000000
+Config: Use GPS : True
+Config: Use GPS Orientation as Constraint: False
+Config: Use GPS Orientation as Initial: False
+Config: Use GPS Velocity: True
+Config: Velocity Constraint Weight: 150.000000
+Config: World Frame ID: map
+
+
+

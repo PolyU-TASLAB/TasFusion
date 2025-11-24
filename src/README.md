@@ -2,7 +2,7 @@
 
 ## 概览
 
-ToySLAM 是一个面向多传感器导航的 ROS 1 工作区，核心提供基于 Ceres 的 GNSS/IMU 紧耦合滑动窗口优化，并配套 GNSS 消息定义、NLOS 排除工具、NovAtel 驱动、NMEA 解析与结果分析脚本。核心融合节点支持 IMU 预积分、偏置在线估计、边缘化保持历史信息以及 GPS 位置/速度约束，可通过 launch 参数灵活开启。
+ToySLAM 是一个面向多传感器导航的 ROS1 Package，核心提供基于 Ceres 的 GNSS/IMU 紧耦合滑动窗口优化，并配套 GNSS 消息定义、NLOS 排除工具、NovAtel 驱动、NMEA 解析与结果分析脚本。核心融合节点支持 IMU 预积分、偏置在线估计、边缘化保持历史信息以及 GPS 位置/速度约束，可通过 launch 参数灵活开启。
 
 ## 功能亮点
 

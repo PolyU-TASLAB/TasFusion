@@ -1,13 +1,10 @@
-# cmake_minimum_required(VERSION 3.5)
 cmake_minimum_required(VERSION 3.5)
 project(toyslam)
 
-# Use C++17 as required by your code
+# Use C++17 as required by codes
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-
-set(Eigen3_DIR /usr/include/eigen3/cmake)
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Compiler flags: ${CMAKE_CXX_FLAGS}")
@@ -25,12 +22,12 @@ find_package(catkin REQUIRED COMPONENTS
   novatel_msgs
   gnss_comm
   nlosexclusion
+  visualization_msgs
 )
 
 ## Find system dependencies
 find_package(Eigen3 REQUIRED)
 find_package(Ceres REQUIRED)
-
 
 ## Catkin specific configuration
 catkin_package(
@@ -46,6 +43,7 @@ catkin_package(
     novatel_msgs
     gnss_comm
     nlosexclusion
+    visualization_msgs
   DEPENDS 
     EIGEN3 
     CERES 
@@ -62,9 +60,6 @@ include_directories(
 ## Declare C++ executables
 add_executable(gnss_imu_sw_node src/gnss_imu_sw_node.cpp)
 
-## Set C++17 for specific targets
-set_property(TARGET gnss_imu_sw_node PROPERTY CXX_STANDARD 17)
-
 ## Add cmake target dependencies of the executables
 add_dependencies(gnss_imu_sw_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
@@ -74,6 +69,7 @@ target_link_libraries(gnss_imu_sw_node
   ${CERES_LIBRARIES}
 )
 
+## Install targets
 install(TARGETS gnss_imu_sw_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

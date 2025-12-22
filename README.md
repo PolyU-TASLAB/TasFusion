@@ -30,17 +30,35 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
 
   This design allows seamless integration with different GNSS receivers and data pipelines.
 
-## 仓库结构
+## Repository Structure
 
-- `toyslam/`：核心 GNSS/IMU 融合节点、rviz 配置与启动文件，负责滑动窗口优化与数据记录
-- `nlosexclusion/`：GNSS NLOS 排除相关消息定义与实现
-- [novatel_span_driver/](https://github.com/ros-drivers/novatel_span_driver.git)：连接 NovAtel SPAN 接收机的ROS驱动包
-- [gnss_comm/](https://github.com/HKUST-Aerial-Robotics/gnss_comm.git)：GNSS 原始测量的定义与工具库，包含依赖说明与 Docker 支持
-- `nmea_parser/`：基于 `gnss_comm` 的 NMEA 解析包
-- `helper_scripts/`：用于分析及图像绘制的脚本集合
-- `support_files/`：包含 toySLAM 教程 PDF 与ceres、Eigen依赖包压缩文件
-- `data/rosbag/demo_rosbag.zip`：内置示例数据rosbag，可用于快速回放测试
-- `data/results/`：程序结果存储目录
+* **`toyslam/`**
+
+  Core GNSS/IMU sensor fusion package, including the sliding-window optimization node, RViz configurations, and launch files. This module is responsible for nonlinear optimization, state estimation, and data logging.
+* **`nlosexclusion/`**
+
+  GNSS NLOS (Non-Line-of-Sight) exclusion module, providing message definitions and implementation for NLOS detection and mitigation.
+* **[`novatel_span_driver/`](https://github.com/ros-drivers/novatel_span_driver.git)**
+
+  ROS driver for interfacing with NovAtel SPAN GNSS/INS receivers.
+* **[`gnss_comm/`](https://github.com/HKUST-Aerial-Robotics/gnss_comm.git)**
+
+  A GNSS utility library providing raw GNSS measurement definitions and processing tools, along with dependency documentation and Docker support.
+* **`nmea_parser/`**
+
+  NMEA parsing package built on top of `gnss_comm`, enabling standardized GNSS message decoding and conversion.
+* **`helper_scripts/`**
+
+  A collection of scripts for data analysis, visualization, and performance evaluation.
+* **`support_files/`**
+
+  Supplementary materials including a ToySLAM tutorial PDF and archived dependency packages for Ceres Solver and Eigen.
+* **`data/rosbag/demo_rosbag.zip`**
+
+  Built-in demo rosbag for quick testing and playback.
+* **`data/results/`**
+
+  Directory for storing output results, logs, and exported CSV files.
 
 ## Enviroment & Dependencies
 

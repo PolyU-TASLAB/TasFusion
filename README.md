@@ -1,12 +1,46 @@
-# ToySLAM GNSS/IMU Fusion Workspace
+<p align="center">
+  <img src="https://raw.githubusercontent.com/PolyU-TASLAB/polyu-taslab.github.io/main/images/logo.svg" width="80"/>
+</p>
+<h1 align="center">ToySLAM</h1>
+<p align="center">
+GNSS / IMU Sliding-Window Optimization Framework
+</p>
 
-| Author Name | Affiliation      | Contact Email               |
-| :----------: | ---------------- | --------------------------- |
-|  Gao Yixin  | HK PolyU TAS LAB | yixin.gao@connect.polyu.hk  |
-| Wang Xiangru | HK PolyU TAS LAB | xiangru.wang@polyu.edu.hk   |
-|  ZHAO Jiaqi  | HK PolyU TAS LAB | jiaqi.zhao@connect.polyu.hk |
+<div align="center">
+<table>
+  <thead>
+    <tr>
+      <th align="center">Author Name</th>
+      <th align="center">Affiliation</th>
+      <th align="center">Contact Email</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">Gao Yixin</td>
+      <td align="center">HK PolyU TAS LAB</td>
+      <td align="center">yixin.gao@connect.polyu.hk</td>
+    </tr>
+    <tr>
+      <td align="center">Wang Xiangru</td>
+      <td align="center">HK PolyU TAS LAB</td>
+      <td align="center">xiangru.wang@polyu.edu.hk</td>
+    </tr>
+    <tr>
+      <td align="center">ZHAO Jiaqi</td>
+      <td align="center">HK PolyU TAS LAB</td>
+      <td align="center">jiaqi.zhao@connect.polyu.hk</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
-[PolyU TASLab](https://polyu-taslab.github.io/): https://polyu-taslab.github.io/
+<p align="center">
+  <a href="https://polyu-taslab.github.io/">
+    <strong>PolyU TASLab</strong>
+  </a><br/>
+  https://polyu-taslab.github.io/
+</p>
 
 ## Overview
 

@@ -152,17 +152,16 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
 ### For Host installation
 
 1. **Create a workspace and clone the repository
-   (Assuming the workspace path is `~/tasfusion_ws/src`):**
 
    ```bash
-   mkdir ~/tasfusion_ws/src
+   mkdir -p ~/tasfusion_ws/src
    cd ~/tasfusion_ws/src
-   git clone https://github.com/Qiamp/TasFusion.git
+   git clone https://github.com/Qiamp/TasFusion.git .
    ```
 2. **Build the workspace and source the environment** :
 
    ```bash
-   cd ~/catkin_ws
+   cd ~/tasfusion_ws
    catkin_make
    source devel/setup.bash
    ```
@@ -193,7 +192,10 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
    (RViz is enabled by default):
 
    ```bash
+   <!-- For Host installation -->
    roslaunch tasfusion batch_board.launch
+   <!-- For Docker installation -->
+   roslaunch tasfusion batch_board_docker.launch
    ```
 
    The launch file allows users to configure GPS/IMU topics, enable or disable bias estimation, and adjust the sliding-window size and other parameters.

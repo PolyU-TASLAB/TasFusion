@@ -48,6 +48,24 @@ TasFusion is a ROS1 package designed for multi-sensor navigation. Its core funct
 
 The central sensor-fusion node supports IMU pre-integration, online bias estimation, marginalization to preserve historical information, and GPS position/velocity constraints. All major functions can be flexibly enabled or disabled through parameters configured in launch files.
 
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="img/board.png" width="380"/>
+    </td>
+    <td align="center">
+      <img src="data/results/demo.gif" width="380"/>
+    </td>
+    <td align="center">
+      <img src="img/longdata.png" width="380"/>
+    </td>
+  </tr>
+</table>
+
+> Reference Hardware Platform:
+> TasFusion has been validated on GNSS-IMU-4G integrated navigation module (dual-IMU + u-blox F9P + 4G uplink), providing high-frequency measurements and reliable telemetry for outdoor deployments.
+> For inquiries regarding this hardware platform, please contact **hbwu@hkpolyu-wxresearch.cn**.
+
 ## Key Features
 
 * **Sliding-Window Nonlinear Optimization with Marginalization**
@@ -128,7 +146,9 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
   ```
 
 ## Build Instructions
+
 ### For Host installation
+
 1. **Create a workspace and clone the repository
    (Assuming the workspace path is `~/tasfusion_ws/src`):**
 
@@ -144,7 +164,9 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
    catkin_make
    source devel/setup.bash
    ```
+
 ### For Docker installation
+
 1. **Create a workspace and clone the repository
    (Assuming the workspace path is `~/tasfusion_ws/src`):**
 
@@ -164,7 +186,7 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
 ## Quick Start
 
 1. **Extract the demo dataset** :
-   `unzip data/rosbag/demo_rosbag.zip -d data/rosbag`。
+   `unzip data/rosbag/demo_rosbag.zip -d data/rosbag`
 2. **Launch the fusion node and visualization**
    (RViz is enabled by default):
 
@@ -282,12 +304,6 @@ The node can export key signals and metrics to CSV. Ensure the directory exists 
 
 * Trajectories, ground truth, optimized states, and evaluation metrics are exported as CSV files to the specified paths under `data/results/`. This facilitates further alignment, visualization, and quantitative analysis using external tools (e.g., Python or MATLAB).
 * The script `helper_scripts/analysis_freq.py` can be used to analyze and visualize rosbag topic frequencies and timing jitter, helping to assess sensor timing quality and data consistency.
-
-## Sample Result
-
-<p align="center">
-  <img src="data/results/demo.gif" alt="tasfusion Demo" width="800"/>
-</p>
 
 ## References
 

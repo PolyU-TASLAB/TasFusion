@@ -63,7 +63,9 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
 </table>
 
 > Reference Hardware Platform ([Introduction Video](https://www.bilibili.com/video/BV1fiaqzNEEm)):
+
 > TasFusion has been validated on GNSS-IMU-4G integrated navigation module (dual-IMU + u-blox F9P-04B + 4G uplink), providing high-frequency measurements and reliable telemetry for outdoor deployments.
+
 > For inquiries regarding this hardware platform, please contact **hbwu@hkpolyu-wxresearch.cn**.
 
 ## Key Features

@@ -17,12 +17,12 @@
 
     <arg name="gravity_magnitude" default="9.785" doc="Gravity acceleration magnitude (m/s^2)" />
 
-    <arg name="gps_log_path" default="$(find toyslam)/../data/results/gps_log.csv" />
-    <arg name="gt_log_path" default="$(find toyslam)/../data/results/gt_log.csv" />
-    <arg name="optimized_log_path" default="$(find toyslam)/../data/results/optimized_log.csv" />
-    <arg name="results_log_path" default="$(find toyslam)/../data/results/results_log.csv" />
-    <arg name="metrics_log_path" default="$(find toyslam)/../data/results/metrics_log.csv" />
-    <arg name="bias_log_path" default="$(find toyslam)/../data/results/bias_log.csv" />
+    <arg name="gps_log_path" default="$(find tasfusion)/../data/results/gps_log.csv" />
+    <arg name="gt_log_path" default="$(find tasfusion)/../data/results/gt_log.csv" />
+    <arg name="optimized_log_path" default="$(find tasfusion)/../data/results/optimized_log.csv" />
+    <arg name="results_log_path" default="$(find tasfusion)/../data/results/results_log.csv" />
+    <arg name="metrics_log_path" default="$(find tasfusion)/../data/results/metrics_log.csv" />
+    <arg name="bias_log_path" default="$(find tasfusion)/../data/results/bias_log.csv" />
     
     <arg name="gps_message_type" default="gnss_comm" />
 
@@ -71,9 +71,9 @@
     <arg name="velocity_constraint_weight" default="150.0" />
 
 
-    <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(find toyslam)/rviz/gps_trajectory.rviz" />
+    <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(find tasfusion)/rviz/gps_trajectory.rviz" />
 
-    <node name="gnss_imu_sw_node" pkg="toyslam" type="gnss_imu_sw_node" output="screen">
+    <node name="gnss_imu_sw_node" pkg="tasfusion" type="gnss_imu_sw_node" output="screen">
         <param name="use_gps" value="$(arg use_gps)" />
         
         <param name="imu_topic" value="$(arg imu_topic)" />

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>toyslam</name>
+  <name>tasfusion</name>
   <version>1.0.0</version>
-  <description>The toyslam package</description>
+  <description>The tasfusion package</description>
   
   <maintainer email="yixin.gao@connect.polyu.hk">Yixin Gao</maintainer>
   <maintainer email="xiangru.wang@polyu.edu.hk">Xiangru Wang</maintainer>

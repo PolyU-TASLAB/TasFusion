@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Define names for your image and container for easy reuse
-IMAGE_NAME="toyslam-dev"
-CONTAINER_NAME="toyslam_container"
+IMAGE_NAME="tasfusion-dev"
+CONTAINER_NAME="tasfusion_container"
 
 # Define local output directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

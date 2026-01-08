@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(toyslam)
+project(tasfusion)
 
 # Use C++17 as required by codes
 set(CMAKE_CXX_STANDARD 17)

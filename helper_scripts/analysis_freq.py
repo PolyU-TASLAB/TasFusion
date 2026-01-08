@@ -1,21 +1,21 @@
 # /**
-# * This file is part of toyslam.
+# * This file is part of tasfusion.
 # *
 # * Copyright (C) 2025 Trustworthy AI and Autonomous Systems Laboratory, The Hong Kong Polytechnic University (PolyU)
 # * Author: ZHAO Jiaqi (jiaqi.zhao@connect.polyu.hk) Wang Xiangru (xiangru.wang@polyu.edu.hk) Gao Yixin (yixin.gao@connect.polyu.hk)
 # *
-# * toyslam is free software: you can redistribute it and/or modify
+# * tasfusion is free software: you can redistribute it and/or modify
 # * it under the terms of the GNU General Public License as published by
 # * the Free Software Foundation, either version 3 of the License, or
 # * (at your option) any later version.
 # *
-# * toyslam is distributed in the hope that it will be useful,
+# * tasfusion is distributed in the hope that it will be useful,
 # * but WITHOUT ANY WARRANTY; without even the implied warranty of
 # * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # * GNU General Public License for more details.
 # *
 # * You should have received a copy of the GNU General Public License
-# * along with toyslam. If not, see <http://www.gnu.org/licenses/>.
+# * along with tasfusion. If not, see <http://www.gnu.org/licenses/>.
 # */
 import rosbag
 import matplotlib.pyplot as plt
@@ -24,7 +24,7 @@ import sys
 from collections import defaultdict
 
 # --- User Settings ---
-ROSBAG_FILEPATH = '~/code/toyslam_ws/src/data/phone_sensors_20250707_160418.bag'
+ROSBAG_FILEPATH = '~/code/tasfusion_ws/src/data/phone_sensors_20250707_160418.bag'
 
 # Define the ROS topics you are interested in
 TOPICS_TO_ANALYZE = ['/cam0/image_raw', '/imu/data', '/phone_raw_measurements']

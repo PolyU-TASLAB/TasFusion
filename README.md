@@ -1,7 +1,7 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/PolyU-TASLAB/polyu-taslab.github.io/main/images/logo.svg" width="80"/>
 </p>
-<h1 align="center">ToySLAM</h1>
+<h1 align="center">TasFusion</h1>
 <p align="center">
 GNSS / IMU Sliding-Window Optimization Framework
 </p>
@@ -44,7 +44,7 @@ GNSS / IMU Sliding-Window Optimization Framework
 
 ## Overview
 
-ToySLAM is a ROS1 package designed for multi-sensor navigation. Its core functionality provides a Ceres-based GNSS/IMU loosely coupled sliding-window optimization framework, along with supporting tools including GNSS message definitions, NLOS exclusion utilities, a NovAtel driver, and NMEA ROS parsing scripts.
+TasFusion is a ROS1 package designed for multi-sensor navigation. Its core functionality provides a Ceres-based GNSS/IMU loosely coupled sliding-window optimization framework, along with supporting tools including GNSS message definitions, NLOS exclusion utilities, a NovAtel driver, and NMEA ROS parsing scripts.
 
 The central sensor-fusion node supports IMU pre-integration, online bias estimation, marginalization to preserve historical information, and GPS position/velocity constraints. All major functions can be flexibly enabled or disabled through parameters configured in launch files.
 
@@ -52,7 +52,7 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
 
 * **Sliding-Window Nonlinear Optimization with Marginalization**
 
-  `toyslam` implements a GNSS/IMU loosely coupled sliding-window optimization framework based on  **Ceres Solver** ,  **Eigen** , and core **ROS** libraries. The central node `gnss_imu_sw_node` performs nonlinear least-squares optimization within a fixed-size window, while marginalization is applied to retain historical information and maintain computational efficiency.
+  TasFusion implements a GNSS/IMU loosely coupled sliding-window optimization framework based on  **Ceres Solver** ,  **Eigen** , and core **ROS** libraries. The central node `gnss_imu_sw_node` performs nonlinear least-squares optimization within a fixed-size window, while marginalization is applied to retain historical information and maintain computational efficiency.
 * **Highly Configurable Sensor Inputs and Fusion Strategy**
 
   Launch files provide flexible configuration of IMU, GNSS, and ground-truth topics and message types. The system supports GPS-based position, velocity, and attitude initialization, and allows users to enable or disable online bias estimation, marginalization, and velocity/attitude constraint weighting via parameters, facilitating ablation studies and algorithm evaluation.
@@ -74,7 +74,7 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
 
 ## Repository Structure
 
-* **`toyslam/`**
+* **`tasfusion/`**
 
   Core GNSS/IMU sensor fusion package, including the sliding-window optimization node, RViz configurations, and launch files. This module is responsible for nonlinear optimization, state estimation, and data logging.
 * **`nlosexclusion/`**
@@ -94,7 +94,7 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
   A collection of scripts for data analysis, visualization, and performance evaluation.
 * **`support_files/`**
 
-  Supplementary materials including a ToySLAM tutorial PDF and archived dependency packages for Ceres Solver and Eigen.
+  Supplementary materials including a tasfusion tutorial PDF and archived dependency packages for Ceres Solver and Eigen.
 * **`data/rosbag/demo_rosbag.zip`**
 
   Built-in demo rosbag for quick testing and playback.
@@ -130,11 +130,11 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
 ## Build Instructions
 
 1. **Create a workspace and clone the repository
-   (Assuming the workspace path is `~/toyslam_ws/src`):**
+   (Assuming the workspace path is `~/tasfusion_ws/src`):**
 
    ```bash
-   mkdir ~/toyslam_ws/src
-   cd ~/toyslam_ws/src
+   mkdir ~/tasfusion_ws/src
+   cd ~/tasfusion_ws/src
    git clone https://github.com/Qiamp/batch_board_sw.git
    ```
 2. **Build the workspace and source the environment** :
@@ -153,7 +153,7 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
    (RViz is enabled by default):
 
    ```bash
-   roslaunch toyslam batch_board.launch
+   roslaunch tasfusion batch_board.launch
    ```
 
    The launch file allows users to configure GPS/IMU topics, enable or disable bias estimation, and adjust the sliding-window size and other parameters.
@@ -165,7 +165,7 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
 4. **Run without visualization (e.g., on a server or headless system)** :
 
    ```
-   roslaunch toyslam batch_board.launch rviz:=false
+   roslaunch tasfusion batch_board.launch rviz:=false
    ```
 
 ## Key Parameters
@@ -270,20 +270,20 @@ The node can export key signals and metrics to CSV. Ensure the directory exists 
 ## Sample Result
 
 <p align="center">
-  <img src="data/results/demo.gif" alt="ToySLAM Demo" width="800"/>
+  <img src="data/results/demo.gif" alt="tasfusion Demo" width="800"/>
 </p>
 
 ## References
 
-* **`Support_files/toySLAM_Tutorial.pdf` :** Detailed algorithm derivations and experimental explanations.
+* **`Support_files/tasfusion_Tutorial.pdf` :** Detailed algorithm derivations and experimental explanations.
 * **[GNSS_COMM Official Wiki](https://github.com/HKUST-Aerial-Robotics/gnss_comm)** : Documentation for GNSS raw measurement definitions and related tools.
 * **[NovAtel Official Wiki](https://wiki.ros.org/novatel_span_driver)** : Official documentation for NovAtel GNSS/INS receivers and message formats.
 
 ## Acknowledgement
 
-This project was developed in the context of the **AAE4302** course offered by the Department of Aeronautical and Aviation Engineering at  **The Hong Kong Polytechnic University (PolyU)** .
+This project was developed in the context of the **AAE4203** course offered by the Department of Aeronautical and Aviation Engineering at  **The Hong Kong Polytechnic University (PolyU)** .
 
-The authors would like to acknowledge the course for providing a solid theoretical foundation and practical framework in navigation, sensor fusion, and state estimation, which greatly contributed to the design and implementation of ToySLAM.
+The authors would like to acknowledge the course for providing a solid theoretical foundation and practical framework in navigation, sensor fusion, and state estimation, which greatly contributed to the design and implementation of tasfusion.
 
 ## License
 

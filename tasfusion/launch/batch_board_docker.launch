@@ -71,9 +71,9 @@
     <arg name="velocity_constraint_weight" default="150.0" />
 
 
-    <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(find toyslam)/rviz/gps_trajectory.rviz" />
+    <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(find tasfusion)/rviz/gps_trajectory.rviz" />
 
-    <node name="gnss_imu_sw_node" pkg="toyslam" type="gnss_imu_sw_node" output="screen">
+    <node name="gnss_imu_sw_node" pkg="tasfusion" type="gnss_imu_sw_node" output="screen">
         <param name="use_gps" value="$(arg use_gps)" />
         
         <param name="imu_topic" value="$(arg imu_topic)" />

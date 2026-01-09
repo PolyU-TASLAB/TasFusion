@@ -323,6 +323,7 @@ The node can export key signals and metrics to CSV. Ensure the directory exists 
 * **`Support_files/tasfusion_Tutorial.pdf` :** Detailed algorithm derivations and experimental explanations.
 * **[GNSS_COMM Official Wiki](https://github.com/HKUST-Aerial-Robotics/gnss_comm)** : Documentation for GNSS raw measurement definitions and related tools.
 * **[NovAtel Official Wiki](https://wiki.ros.org/novatel_span_driver)** : Official documentation for NovAtel GNSS/INS receivers and message formats.
+* **[GraphGNSSLib](https://github.com/weisongwen/GraphGNSSLib.git)** : An Open-source Package for GNSS Positioning and Real-time Kinematic Using Factor Graph Optimization.
 
 
 ## 11. License
@@ -339,3 +340,6 @@ This project includes and/or is derived from the following GPL-3.0 and BSD licen
 - novatel_span_driver
   Source: https://github.com/ros-drivers/novatel_span_driver.git
   License: BSD
+- GraphGNSSLib
+  Source: https://github.com/weisongwen/GraphGNSSLib.git
+  License: GPL-3.0

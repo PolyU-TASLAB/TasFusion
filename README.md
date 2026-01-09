@@ -68,6 +68,14 @@ The central sensor-fusion node supports IMU pre-integration, online bias estimat
 >
 > For inquiries regarding this hardware platform, please contact **hbwu@hkpolyu-wxresearch.cn**.
 
+## Acknowledgement
+
+This project was developed in the context of the **AAE4203** course offered by the Department of Aeronautical and Aviation Engineering at  **The Hong Kong Polytechnic University (PolyU)** .
+
+The authors would like to acknowledge the course for providing a solid theoretical foundation and practical framework in navigation, sensor fusion, and state estimation, which greatly contributed to the design and implementation of tasfusion.
+
+The authors also gratefully acknowledge the Research Center for Autonomous System in Smart Transportation, PolyU-Wuxi Technology and Innovation Research Institute, for its technical support, research environment, and resources that facilitated the development and validation of this work.
+
 ## Key Features
 
 * **Sliding-Window Nonlinear Optimization with Marginalization**
@@ -316,13 +324,6 @@ The node can export key signals and metrics to CSV. Ensure the directory exists 
 * **[GNSS_COMM Official Wiki](https://github.com/HKUST-Aerial-Robotics/gnss_comm)** : Documentation for GNSS raw measurement definitions and related tools.
 * **[NovAtel Official Wiki](https://wiki.ros.org/novatel_span_driver)** : Official documentation for NovAtel GNSS/INS receivers and message formats.
 
-## Acknowledgement
-
-This project was developed in the context of the **AAE4203** course offered by the Department of Aeronautical and Aviation Engineering at  **The Hong Kong Polytechnic University (PolyU)** .
-
-The authors would like to acknowledge the course for providing a solid theoretical foundation and practical framework in navigation, sensor fusion, and state estimation, which greatly contributed to the design and implementation of tasfusion.
-
-The authors also gratefully acknowledge the Research Center for Autonomous System in Smart Transportation, PolyU-Wuxi Technology and Innovation Research Institute, for its technical support, research environment, and resources that facilitated the development and validation of this work.
 
 ## License
 

@@ -1,0 +1,16 @@
+anchors:
+  - {x: 0.0, y: 0.0, z: 0.0}
+  - {x: 5.0, y: 0.0, z: 0.0}
+  - {x: 0.0, y: 5.0, z: 0.0}
+  - {x: 5.0, y: 5.0, z: 0.0}
+
+noise_std: 0.15
+motion_radius: 2.0
+motion_speed: 0.8
+motion_type: "helical"
+
+max_iterations: 150
+solver_tolerance: 1e-8
+linear_solver_type: "DENSE_QR"
+use_huber_loss: true
+huber_loss_threshold: 1.5

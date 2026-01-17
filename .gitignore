@@ -1,0 +1,92 @@
+# =========================
+# ROS workspace build files
+# =========================
+build/
+build_isolated/
+devel/
+devel_isolated/
+install/
+log/
+logs/
+
+# colcon / catkin meta files
+.colcon/
+.catkin_tools/
+
+# 生成的接口代码
+msg_gen/
+srv_gen/
+action_gen/
+# ROS1 legacy gen 路径
+genmsg/
+gennodejs/
+geneus/
+gencpp/
+genpy/
+genlisp/
+
+# =========================
+# CMake / Make build files
+# =========================
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+install_manifest.txt
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# =========================
+# Editor temp files
+# =========================
+*~
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# =========================
+# binary / compiled files
+# =========================
+*.o
+*.lo
+*.la
+*.al
+*.so
+*.dylib
+*.dll
+*.a
+*.out
+
+# =========================
+# 日志 / 临时
+# =========================
+*.log
+*.tmp
+
+# =========================
+# Code coverage files
+# =========================
+coverage/
+*.gcno
+*.gcda
+*.gcov
+
+# =========================
+# Other build artifacts
+# =========================
+dist/
+.eggs/
+*.egg-info
+
+# =========================
+# ROS2 colcon test results
+# =========================
+test_results/

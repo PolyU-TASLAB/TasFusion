@@ -1,0 +1,133 @@
+<launch>
+    <arg name="rviz" default="true" />
+    
+    <arg name="use_gps" default="true" />
+
+    <arg name="imu_topic" default="/imu_gnss_driver/imu1/data" />
+    <arg name="gps_topic" default="/ublox_driver/receiver_pvt" />
+
+    <arg name="subscribe_to_ground_truth" default="false" />
+    <arg name="ground_truth_topic" default="/novatel_data/inspvax" />
+
+    <arg name="artificial_pos_noise_std" default="1" doc="Artificial position noise standard deviation (m)" />
+    <arg name="artificial_vel_noise_std" default="0" doc="Artificial velocity noise standard deviation (m/s)" />
+
+    <arg name="gps_position_noise" default="0.01" doc="Default GPS position noise (m)" />
+    <arg name="gps_velocity_noise" default="0.001" doc="Default GPS velocity noise (m/s)" />
+
+    <arg name="gravity_magnitude" default="9.785" doc="Gravity acceleration magnitude (m/s^2)" />
+
+    <arg name="gps_log_path" default="$(find tasfusion)/../data/results/gps_log.csv" />
+    <arg name="gt_log_path" default="$(find tasfusion)/../data/results/gt_log.csv" />
+    <arg name="optimized_log_path" default="$(find tasfusion)/../data/results/optimized_log.csv" />
+    <arg name="results_log_path" default="$(find tasfusion)/../data/results/results_log.csv" />
+    <arg name="metrics_log_path" default="$(find tasfusion)/../data/results/metrics_log.csv" />
+    <arg name="bias_log_path" default="$(find tasfusion)/../data/results/bias_log.csv" />
+    
+    <arg name="gps_message_type" default="gnss_comm" />
+
+
+    <arg name="world_frame_id" default="map" doc="World reference coordinate frame" />
+    <arg name="body_frame_id" default="base_link" doc="Body coordinate frame" />
+
+    
+    <arg name="enable_bias_estimation" default="true" doc="Whether to estimate IMU bias" />
+    <arg name="enable_marginalization" default="true" doc="Whether to enable marginalization to retain historical information" />
+    
+    <arg name="optimization_window_size" default="10" doc="Number of keyframes in sliding window" />
+    <arg name="optimization_frequency" default="1" doc="Optimizer running frequency (Hz)" />
+    <arg name="max_iterations" default="30" doc="Maximum iterations for Ceres solver" />
+
+
+    <arg name="imu_acc_noise" default="0.015" doc="Accelerometer white noise (m/s^2)" />
+    <arg name="imu_gyro_noise" default="0.12" doc="Gyroscope white noise (rad/s)" />
+    
+    <arg name="imu_acc_bias_noise" default="0.0008" doc="Accelerometer bias random walk noise" />
+    <arg name="imu_gyro_bias_noise" default="0.0017" doc="Gyroscope bias random walk noise" />
+    
+    <arg name="initial_acc_bias_x" default="0.0" />
+    <arg name="initial_acc_bias_y" default="0.0" />
+    <arg name="initial_acc_bias_z" default="0.0" />
+    <arg name="initial_gyro_bias_x" default="0.0" />
+    <arg name="initial_gyro_bias_y" default="0.0" />
+    <arg name="initial_gyro_bias_z" default="0.0" />
+    
+    <arg name="max_integration_dt" default="0.005" doc="Maximum time step for IMU integration (s)" />
+    <arg name="bias_correction_threshold" default="0.05" doc="Bias correction threshold in IMU preintegration" />
+
+
+    <arg name="use_gps_velocity" default="true" doc="Whether to use GPS velocity information" />
+    <arg name="use_gps_orientation_as_initial" default="false" doc="Whether to use GPS orientation as initial value for new keyframes" />
+    <arg name="enable_velocity_constraint" default="false" doc="Whether to use GPS velocity as optimization constraint" />
+    
+    <arg name="max_velocity" default="55.0" doc="Maximum allowed velocity (m/s)" />
+    <arg name="min_horizontal_velocity" default="0.0" doc="Minimum horizontal velocity to maintain (m/s)" />
+    
+    <arg name="enable_roll_pitch_constraint" default="false" doc="Enable zero roll/pitch constraint (for ground vehicles)" />
+    <arg name="enable_orientation_smoothness_factor" default="false" doc="Enable orientation smoothness constraint" />
+    
+    <arg name="roll_pitch_weight" default="300.0" />
+    <arg name="orientation_smoothness_weight" default="100.0" />
+    <arg name="velocity_constraint_weight" default="150.0" />
+
+
+    <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(find tasfusion)/rviz/gps_trajectory.rviz" />
+
+    <node name="gnss_imu_sw_node" pkg="tasfusion" type="gnss_imu_sw_node" output="screen">
+        <param name="use_gps" value="$(arg use_gps)" />
+        
+        <param name="imu_topic" value="$(arg imu_topic)" />
+        <param name="gps_topic" value="$(arg gps_topic)" />
+        <param name="gps_message_type" value="$(arg gps_message_type)" />
+
+        <param name="world_frame_id" value="$(arg world_frame_id)" />
+        <param name="body_frame_id" value="$(arg body_frame_id)" />
+
+        <param name="enable_bias_estimation" value="$(arg enable_bias_estimation)" />
+        <param name="enable_marginalization" value="$(arg enable_marginalization)" />
+        <param name="optimization_window_size" value="$(arg optimization_window_size)" />
+        <param name="optimization_frequency" value="$(arg optimization_frequency)" />
+        <param name="max_iterations" value="$(arg max_iterations)" />
+
+        <param name="imu_acc_noise" value="$(arg imu_acc_noise)" />
+        <param name="imu_gyro_noise" value="$(arg imu_gyro_noise)" />
+        <param name="imu_acc_bias_noise" value="$(arg imu_acc_bias_noise)" />
+        <param name="imu_gyro_bias_noise" value="$(arg imu_gyro_bias_noise)" />
+        <param name="initial_acc_bias_x" value="$(arg initial_acc_bias_x)" />
+        <param name="initial_acc_bias_y" value="$(arg initial_acc_bias_y)" />
+        <param name="initial_acc_bias_z" value="$(arg initial_acc_bias_z)" />
+        <param name="initial_gyro_bias_x" value="$(arg initial_gyro_bias_x)" />
+        <param name="initial_gyro_bias_y" value="$(arg initial_gyro_bias_y)" />
+        <param name="initial_gyro_bias_z" value="$(arg initial_gyro_bias_z)" />
+        <param name="max_integration_dt" value="$(arg max_integration_dt)" />
+        <param name="bias_correction_threshold" value="$(arg bias_correction_threshold)" />
+
+        <param name="use_gps_velocity" value="$(arg use_gps_velocity)" />
+        <param name="use_gps_orientation_as_initial" value="$(arg use_gps_orientation_as_initial)" />
+        <param name="enable_velocity_constraint" value="$(arg enable_velocity_constraint)" />
+        <param name="gps_position_noise" value="$(arg gps_position_noise)" />
+        <param name="gps_velocity_noise" value="$(arg gps_velocity_noise)" />
+
+        <param name="gravity_magnitude" value="$(arg gravity_magnitude)" />
+        <param name="max_velocity" value="$(arg max_velocity)" />
+        <param name="min_horizontal_velocity" value="$(arg min_horizontal_velocity)" />
+        <param name="enable_roll_pitch_constraint" value="$(arg enable_roll_pitch_constraint)" />
+        <param name="enable_orientation_smoothness_factor" value="$(arg enable_orientation_smoothness_factor)" />
+        <param name="roll_pitch_weight" value="$(arg roll_pitch_weight)" />
+        <param name="orientation_smoothness_weight" value="$(arg orientation_smoothness_weight)" />
+        <param name="velocity_constraint_weight" value="$(arg velocity_constraint_weight)" />
+
+        <param name="subscribe_to_ground_truth" value="$(arg subscribe_to_ground_truth)" />
+        <param name="ground_truth_topic" value="$(arg ground_truth_topic)" />
+
+        <param name="artificial_pos_noise_std" value="$(arg artificial_pos_noise_std)" />
+        <param name="artificial_vel_noise_std" value="$(arg artificial_vel_noise_std)" />
+
+        <param name="gps_log_path" value="$(arg gps_log_path)" />
+        <param name="gt_log_path" value="$(arg gt_log_path)" />
+        <param name="optimized_log_path" value="$(arg optimized_log_path)" />
+        <param name="results_log_path" value="$(arg results_log_path)" />
+        <param name="metrics_log_path" value="$(arg metrics_log_path)" />
+        <param name="bias_log_path" value="$(arg bias_log_path)" />
+    </node>
+</launch>
